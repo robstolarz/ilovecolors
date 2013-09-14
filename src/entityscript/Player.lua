@@ -17,36 +17,12 @@ function Player.new(x,y)
 		new.anim={
 			standing={
 				none={
-					{0,3}
-				},
-				sticky={
-					{0,1}
-				},
-				mega={
-					{0,2}
-				},
-				umbrella={
-					{0,4}
-				},
-				gravity={
 					{0,0}
-				},
+				}
 			},
 			walking={
 				none={
-					{1,3},{2,3}
-				},
-				sticky={
-					{1,1},{2,1}
-				},
-				mega={
-					{1,2},{2,2}
-				},
-				umbrella={
-					{1,4},{2,4}
-				},
-				gravity={
-					{1,0},{2,0}
+					{0,1},{0,2}
 				}
 			}
 		}
@@ -74,7 +50,7 @@ end
 function Player:tick(dt,level) 
 	--gravity first
 	self.vY=math.min(self.vY+1250*dt,10000)
-	self.mdY=self.mdY+math.min(self.vY*dt,self.powerupstate=="umbrella"and 4*16*dt or 128*16*dt)
+	self.mdY=self.mdY+math.min(self.vY,128*16)*dt
 	
 	local ax,ay,bx,by = self.x,self.y,self.x+self.cW,self.y+self.cH
 	
@@ -85,13 +61,7 @@ function Player:tick(dt,level)
 		and self.vY>=0
 	then
 		if love.keyboard.isDown(" ") then
-			if self.powerupstate=="mega" then
-				self.lockcontrol=true
-				self.vY=-400
-				self.constX=16*9
-			else
-				self.vY=-300
-			end
+			self.vY=-300
 		elseif self.vY>=0 then
 			self.lockcontrol=false
 		end
@@ -173,15 +143,9 @@ function Player:tick(dt,level)
 	end
 	
 	
-	self.animframe=(self.animframe+dt/1000000)
+	self.animframe=(self.animframe+dt*7)
 	if math.floor(self.animframe)>#self.anim[self.animstate][self.powerupstate] then
 		self.animframe=1
-	end
-	--http://hastebin.com/wiwofoguma.lua
-	if love.keyboard.isDown("c") then
-		fuck=(fuck or 0)+1
-		local hi = {"none","sticky","mega","umbrella","gravity"}
-		self.powerupstate=hi[fuck%5+1]
 	end
 end
 

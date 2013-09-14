@@ -40,11 +40,11 @@ function Level.fromFile(file,x,y)
 	new.backgroundname = parsed.background
 	new.texturename = parsed.texture
 	new.texturename2 = parsed.texture2
-	new.texture = love.graphics.newImage("/tilesets/"..new.texturename.."/"..new.texturename..".png")
+	new.texture = love.graphics.newImage("/tilesets/"..new.texturename..".png")
 	if new.texturename2 then
-		new.texture2 = love.graphics.newImage("/tilesets/"..new.texturename2.."/"..new.texturename2..".png")
+		new.texture2 = love.graphics.newImage("/tilesets/"..new.texturename2..".png")
 	end
-	new.tilesize = JSON:decode(love.filesystem.read("/tilesets/"..new.texturename.."/"..new.texturename..".json")).tilesize or 32
+	new.tilesize = parsed.tilesize
 	new.entities = parsed.entities or {}
 	new.tiles = onetozero(parsed.tiles or {})
 	new.tiles2 = onetozero(parsed.tiles2 or {})

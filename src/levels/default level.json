@@ -1,7 +1,6 @@
 {
 	"background" : "bg",
-	"texture" : "City Tileset",
-	"texture2" : "City Tileset",
+	"texture" : "black",
 	"entities" : {},
 	"tilesize" : 16,
 	"tiles" : [[]]
