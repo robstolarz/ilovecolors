@@ -49,11 +49,11 @@ function Level.fromFile(file,x,y)
 	new.tiles = onetozero(parsed.tiles or {})
 	new.tiles2 = onetozero(parsed.tiles2 or {})
 	new.collision = onetozero(parsed.collision or {})
-	for i=0,math.floor((lWidth or 320)/new.tilesize)-1 do
+	for i=0,math.floor(320/new.tilesize)-1 do
 		new.tiles[i] = new.tiles[i] or {}
 		new.collision[i] = new.collision[i] or {}
 		new.tiles2[i] = new.tiles2[i] or {}
-		for j=0,math.floor((lHeight or 240)/new.tilesize)-1 do
+		for j=0,math.floor(240/new.tilesize)-1 do
 			new.tiles[i][j] = new.tiles[i][j] or 0
 			new.collision[i][j] = new.collision[i][j] or 0
 			new.tiles2[i][j] = new.tiles2[i][j] or 0
@@ -61,7 +61,8 @@ function Level.fromFile(file,x,y)
 	end
 	return new
 end
-function Level:makeSpriteBatch(which)
+function Level:makeSpriteBatch(which,lWidth,lHeight)
+	lWidth,lHeight = lWidth or 320,lHeight or 240
 	local sb = nil
 	if which == 2 then
 		if self.texture2 then
