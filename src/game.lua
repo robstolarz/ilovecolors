@@ -80,7 +80,7 @@ function love.update(dt)
 	local l={}
 	for v,_ in pairs(entities) do
 		v:tick(dt,level,entityapi)
-		if v.remove then --if the object asks to be removed, queue it
+		if v.remove or v.sleep then --if the object asks to be removed, queue it
 			l[v]=true
 		end
 	end
