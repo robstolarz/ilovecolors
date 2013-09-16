@@ -5,11 +5,8 @@ love.graphics.setMode(lWidth*scale,lHeight*scale,false,false)
 love.graphics.setDefaultImageFilter("linear","nearest") --you'll be ok
 local Level= love.filesystem.load("luaComponents/Level.lua")()
 JSON = love.filesystem.load("luaComponents/JSON.lua")() --apologies for laziness
-local level = Level.fromWorldPos(1000,1000)
-local sb = level:makeSpriteBatch()
-local sb2 = level:makeSpriteBatch(2)
-
-local tolevel=nil
+local level,sb,sb2,entities
+local tolevel={1000,1000}
 api = {
 	switchlevel = function(x,y,preserve)
 		tolevel={x,y,preserve}
@@ -18,11 +15,12 @@ api = {
 		local l={}
 		for v,_ in pairs(entities) do
 			if type(v.testcollision)=="function" then
-				if v:testcollision(self,ax,ay,bx,by) then
+				if v:testcollision(ax,ay,bx,by) then
 					l[v]=true
 				end
 			end
 		end
+		return l
 	end,
 	isinbox = function(x,y,ax,ay,bx,by)
 		return x>ax and x<bx and y>ay and y<by
@@ -36,16 +34,13 @@ for _,script in ipairs(love.filesystem.enumerate("/entityscript")) do
 		scriptables[script]=setmetatable(love.filesystem.load("/entityscript/"..script)(),{__index=api})
 	end
 end
-entities = level:loadEntities(scriptables,api)
 
 function queuedlevelswitch(x,y,preserve)
-	level=level.fromWorldPos(x,y)
-	entities={}
+	world = love.physics.newWorld(0,10)
+	level=Level.fromWorldPos(x,y)
+	entities=level:loadEntities(scriptables,api,world)
 	if preserve then
 		entities[preserve]=true
-	end
-	for v,_ in pairs(level:loadEntities(scriptables)) do
-		entities[v]=true
 	end
 	sb = level:makeSpriteBatch()
 	sb2 = level:makeSpriteBatch(2)

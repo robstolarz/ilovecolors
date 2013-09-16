@@ -1,14 +1,14 @@
 Player = {}
 Player.__index=Player
-function Player.new(x,y)
+function Player.new(world,x,y)
 		local new = setmetatable({},Player)
 		new.x=x
 		new.y=y
 		new.vY=0
 		new.constX=0
 		new.spriteimg=love.graphics.newImage("/entityimg/dapperman.png")
-		new.tW=11
-		new.tH=20
+		new.tW=5
+		new.tH=14
 		new.cW=5 --collision width, used to get edge blocks
 		new.cH=13
 		--suggested move distance
@@ -22,7 +22,7 @@ function Player.new(x,y)
 			},
 			walking={
 				none={
-					{0,1},{0,2}
+					{1,0},{2,0}
 				}
 			}
 		}
@@ -42,7 +42,7 @@ function Player:draw()
 		self.anim[self.animstate][self.powerupstate][math.floor(self.animframe)][1]*self.tW,
 		self.anim[self.animstate][self.powerupstate][math.floor(self.animframe)][2]*self.tH,
 		self.tW,self.tH,self.spriteimg:getWidth(),self.spriteimg:getHeight())
-	love.graphics.drawq(self.spriteimg,self.dataquad,math.floor(self.x+(self.direction==-1 and self.tW or 0)-3),math.floor(self.y-5),0,self.direction,1)
+	love.graphics.drawq(self.spriteimg,self.dataquad,math.floor(self.x+(self.direction==-1 and self.tW or 0)-3),math.floor(self.y),0,self.direction,1)
 end
 function sign(x)
 	if x>0 then return 1 elseif x<0 then return -1 else return 0 end

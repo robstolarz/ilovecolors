@@ -82,9 +82,9 @@ function Level:makeSpriteBatch(which,lWidth,lHeight)
 		if n>=0 and n<width then
 			for m,j in pairs(i) do
 				if j>0 and m>=0 and m<height then
-				--n,m is x,y on screen
-				--j*tilesize%texture.width,j*tilesize/texture.width
-				--don't batch empty tile (j<=0)
+					--n,m is x,y on screen
+					--j*tilesize%texture.width,j*tilesize/texture.width
+					--don't batch empty tile (j<=0)
 					q:setViewport(
 						j*self.tilesize%self.texture:getWidth(),
 						self.tilesize*math.floor(j*self.tilesize/self.texture:getWidth()),
@@ -98,11 +98,11 @@ function Level:makeSpriteBatch(which,lWidth,lHeight)
 	end
 	return sb
 end
-function Level:loadEntities(loadables,api)
+function Level:loadEntities(loadables,api,world)
 	local entities = {}
 	for _,v in pairs(self.entities) do
 		print(v[1],unpack(v[2]))
-		entities[loadables[v[1]].new(unpack(v[2]))]=true --construct each entity: ["Player.lua",[160,120,"entities/dapperman.png"]]
+		entities[loadables[v[1]].new(world,unpack(v[2]))]=true --construct each entity: ["Player.lua",[160,120,"entities/dapperman.png"]]
 		--it looks horrible; that's cause it's an unordered set :D
 	end
 	return entities
