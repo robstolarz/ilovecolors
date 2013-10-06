@@ -1,6 +1,7 @@
 defaultfont = love.graphics.newFont()
 titlefont = love.graphics.newFont("Vera.ttf",love.graphics.getHeight()/5)
-scale=2
+scale = love.graphics.getWidth()/320
+love.graphics.setDefaultImageFilter("linear","nearest") --you'll be ok
 if love.filesystem.exists("revision") then
 	revisionnum = tonumber(love.filesystem.read("revision"))
 end
@@ -21,5 +22,8 @@ function love.keypressed(key)
 	if key=="m" then love.audio.play(bgm) end
 	if key=="s" then 
 		scale=scale+1
+		lWidth,lHeight=320,240 --logical width, height
+		local lWidth,lHeight=lWidth,lHeight
+		love.graphics.setMode(lWidth*scale,lHeight*scale,false,false)
 	end
 end

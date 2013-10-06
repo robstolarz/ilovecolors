@@ -1,13 +1,23 @@
 local scale=scale or 2
 lWidth,lHeight=320,240 --logical width, height
 local lWidth,lHeight=lWidth,lHeight
-love.graphics.setMode(lWidth*scale,lHeight*scale,false,false)
+--love.graphics.setMode(lWidth*scale,lHeight*scale,false,false)
 love.graphics.setDefaultImageFilter("linear","nearest") --you'll be ok
 local Level= love.filesystem.load("luaComponents/Level.lua")()
 JSON = love.filesystem.load("luaComponents/JSON.lua")() --apologies for laziness
 local Physics = love.filesystem.load("luaComponents/physics.lua")()
 local level,sb,sb2,entities
 local tolevel={1000,1000}
+local function examine(obj,depth)
+	depth = depth or 0
+	for i,v in pairs(obj) do
+		if type(v)=="table" then
+			examine(v,depth+1)
+		else
+			print("|"..(" "):rep(depth)..i..": "..tostring(v))
+		end
+	end
+end
 local api = {
 	switchlevel = function(x,y,preserve)
 		tolevel={x,y,preserve}
@@ -17,7 +27,11 @@ local api = {
 	end,
 	getentities = function()
 		return entities
-	end
+	end,
+	sign = function(x)
+		if x>0 then return 1 elseif x<0 then return -1 else return 0 end
+	end,
+	examine = examine
 }
 _G.api=api
 local scriptables = {} --TODO: sandbox this? maybe?
@@ -68,7 +82,8 @@ function love.update(dt)
 		tolevel=nil
 	end
 	if dt>0.018 then return end
-	physicsupdate(dt,entities)
+	gravity = 300 --TODO: clean up this non-obj bs
+	physicsupdate(dt,4000,entities)
 	local l={}
 	for category,ls in pairs(entities) do
 		for _,v in pairs(ls) do

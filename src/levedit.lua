@@ -1,8 +1,7 @@
 --notes: add floodfill, 9patch surfaces, entities, 
 local scale=scale or 2
-local lWidth,lHeight=320,240 --logical width, height
-love.graphics.setMode(lWidth*scale,lHeight*scale,false,true)
-love.graphics.setDefaultImageFilter("nearest","nearest") --you'll be ok
+lWidth,lHeight=320,240 --logical width, height
+local lWidth,lHeight=lWidth,lHeight
 Level= love.filesystem.load("luaComponents/Level.lua")()
 JSON = love.filesystem.load("luaComponents/JSON.lua")() --apologies for laziness
 --level = Level.fromFile("levels/other.json")
@@ -139,7 +138,7 @@ function love.keypressed(key,unicode)
 			guistring="File: "..typestring
 		elseif unicode==99 then
 			editmode = editmode+1
-			if editmode>2 then editmode=0 end
+			if editmode>2 or (editmode>1 and not texture2) then editmode=0 end
 		elseif unicode==70 then
 			love.filesystem.mkdir("/levels")
 			typestring="/levels/"..x..","..y..".json"

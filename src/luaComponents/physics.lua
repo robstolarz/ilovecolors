@@ -7,7 +7,7 @@
 
 --MASK REFERENCE LIST
 
-function physicsupdate(dt,lobjects)
+function physicsupdate(dt,maxyspeed,lobjects)
 	for j, w in pairs(lobjects) do
 		if j ~= "tile" then
 			for i, v in pairs(w) do

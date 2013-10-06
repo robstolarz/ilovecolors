@@ -128,8 +128,10 @@ function Level:loadEntities(loadables,api)
 	if not entities["tile"] then entities["tile"] = {} end
 	for n,i in pairs(self.collision) do
 		for m,j in pairs(i) do
-			if j==1 then
-				table.insert(entities["tile"],loadables["LevelTile"].new(n*self.tilesize,m*self.tilesize,self.tilesize))
+			if j>0 then
+				local tile = loadables["LevelTile"].new(n*self.tilesize,m*self.tilesize,self.tilesize)
+				tile.collisiontype=j
+				table.insert(entities["tile"],tile)
 			end
 		end
 	end
