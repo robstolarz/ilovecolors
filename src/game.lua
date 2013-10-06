@@ -5,42 +5,35 @@ love.graphics.setMode(lWidth*scale,lHeight*scale,false,false)
 love.graphics.setDefaultImageFilter("linear","nearest") --you'll be ok
 local Level= love.filesystem.load("luaComponents/Level.lua")()
 JSON = love.filesystem.load("luaComponents/JSON.lua")() --apologies for laziness
+local Physics = love.filesystem.load("luaComponents/physics.lua")()
 local level,sb,sb2,entities
 local tolevel={1000,1000}
-api = {
+local api = {
 	switchlevel = function(x,y,preserve)
 		tolevel={x,y,preserve}
 	end,
-	trace = function(self,x,y)
-		local l={}
-		for v,_ in pairs(entities) do
-			if type(v.testcollision)=="function" then
-				if v:testcollision(ax,ay,bx,by) then
-					l[v]=true
-				end
-			end
-		end
-		return l
-	end,
 	isinbox = function(x,y,ax,ay,bx,by)
 		return x>ax and x<bx and y>ay and y<by
+	end,
+	getentities = function()
+		return entities
 	end
 }
-
-scriptables = {} --TODO: sandbox this? maybe?
+_G.api=api
+local scriptables = {} --TODO: sandbox this? maybe?
 for _,script in ipairs(love.filesystem.enumerate("/entityscript")) do
 	if string.find(script,"%.lua$") then
-		print(script)
-		scriptables[script]=setmetatable(love.filesystem.load("/entityscript/"..script)(),{__index=api})
+		local storedname = script:sub(1,script:match("()%.lua$")-1)
+		print(script,storedname)
+		scriptables[storedname]=setmetatable(love.filesystem.load("/entityscript/"..script)(),{__index=api})
 	end
 end
 
-function queuedlevelswitch(x,y,preserve)
-	world = love.physics.newWorld(0,10)
+function queuedlevelswitch(x,y,preserve,type)
 	level=Level.fromWorldPos(x,y)
-	entities=level:loadEntities(scriptables,api,world)
-	if preserve then
-		entities[preserve]=true
+	entities=level:loadEntities(scriptables,api)
+	if preserve and type then
+		table.insert(entities[type],preserve)
 	end
 	sb = level:makeSpriteBatch()
 	sb2 = level:makeSpriteBatch(2)
@@ -56,10 +49,13 @@ function love.draw()
 	love.graphics.setColor(0xFF,0xFF,0xFF)
 	if sb2 then love.graphics.draw(sb2) end
 	love.graphics.draw(sb)
-	
-	for v,_ in pairs(entities) do
-		v:draw()
-		love.graphics.setColor(0xFF,0xFF,0xFF)
+	for category,ls in pairs(entities) do
+		for _,v in pairs(ls) do
+			if v.draw then
+				v:draw()
+			end
+			love.graphics.setColor(0xFF,0xFF,0xFF)
+		end
 	end
 	
 	love.graphics.pop()
@@ -72,14 +68,19 @@ function love.update(dt)
 		tolevel=nil
 	end
 	if dt>0.018 then return end
+	physicsupdate(dt,entities)
 	local l={}
-	for v,_ in pairs(entities) do
-		v:tick(dt,level,entityapi)
-		if v.remove or v.sleep then --if the object asks to be removed, queue it
-			l[v]=true
+	for category,ls in pairs(entities) do
+		for _,v in pairs(ls) do
+			if v.tick then
+				v:tick(dt,level,entityapi)
+			end
+			if v.remove or v.sleep then --if the object asks to be removed, queue it
+				l[v]=true
+			end
 		end
-	end
-	for v,_ in pairs(l) do --then remove it afterwards
-		entities[v]=nil --I use this queue thing because even tho it takes more memory, it takes waaay less iteration/frame on usual case
+		for v,_ in pairs(l) do --then remove it afterwards
+			entities[v]=nil --I use this queue thing because even tho it takes more memory, it takes waaay less iteration/frame on usual case
+		end
 	end
 end

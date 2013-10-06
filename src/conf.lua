@@ -1,3 +1,4 @@
+require"cupid"
 function love.conf(t)
     t.title = "colors"        -- The title of the window the game is in (string)
     t.author = "Rob"        -- The author of the game (string)

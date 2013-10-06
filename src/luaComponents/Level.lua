@@ -59,6 +59,24 @@ function Level.fromFile(file,x,y)
 			new.tiles2[i][j] = new.tiles2[i][j] or 0
 		end
 	end
+	--[[new.quadtable = {}
+	for x=0,math.floor(new.texture:getWidth()/new.tilesize)-1 do 
+		for y=0,math.floor(new.texture:getHeight()/new.tilesize)-1 do 
+			local j = y*math.floor(new.texture:getHeight()/new.tilesize)+x*math.floor(new.texture:getWidth()/new.tilesize)
+			new.quadtable[j] = {
+				quad = love.graphics.newQuad(
+					j*new.tilesize%new.texture:getWidth(),
+					new.tilesize*math.floor(j*new.tilesize/new.texture:getWidth()),
+					new.tilesize,
+					new.tilesize,
+					new.texture:getWidth(),
+					new.texture:getHeight()
+				)
+			}
+				
+		end
+	end]]--
+	
 	return new
 end
 function Level:makeSpriteBatch(which,lWidth,lHeight)
@@ -98,12 +116,22 @@ function Level:makeSpriteBatch(which,lWidth,lHeight)
 	end
 	return sb
 end
-function Level:loadEntities(loadables,api,world)
+function Level:loadEntities(loadables,api)
 	local entities = {}
 	for _,v in pairs(self.entities) do
 		print(v[1],unpack(v[2]))
-		entities[loadables[v[1]].new(world,unpack(v[2]))]=true --construct each entity: ["Player.lua",[160,120,"entities/dapperman.png"]]
-		--it looks horrible; that's cause it's an unordered set :D
+		local category = loadables[v[1]] and loadables[v[1]].category or v[1]
+		print(category)
+		if not entities[category] then entities[category] = {} end
+		table.insert(entities[category],loadables[v[1]].new(unpack(v[2]))) --construct each entity: ["Player.lua",[160,120,"entities/dapperman.png"]]
+	end
+	if not entities["tile"] then entities["tile"] = {} end
+	for n,i in pairs(self.collision) do
+		for m,j in pairs(i) do
+			if j==1 then
+				table.insert(entities["tile"],loadables["LevelTile"].new(n*self.tilesize,m*self.tilesize,self.tilesize))
+			end
+		end
 	end
 	return entities
 end

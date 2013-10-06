@@ -7,9 +7,7 @@
 
 --MASK REFERENCE LIST
 
-function physicsupdate(dt)
-	local lobjects = objects
-	
+function physicsupdate(dt,lobjects)
 	for j, w in pairs(lobjects) do
 		if j ~= "tile" then
 			for i, v in pairs(w) do

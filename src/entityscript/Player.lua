@@ -1,6 +1,6 @@
 Player = {}
 Player.__index=Player
-function Player.new(world,x,y)
+function Player.new(x,y)
 		local new = setmetatable({},Player)
 		new.x=x
 		new.y=y
@@ -42,7 +42,7 @@ function Player:draw()
 		self.anim[self.animstate][self.powerupstate][math.floor(self.animframe)][1]*self.tW,
 		self.anim[self.animstate][self.powerupstate][math.floor(self.animframe)][2]*self.tH,
 		self.tW,self.tH,self.spriteimg:getWidth(),self.spriteimg:getHeight())
-	love.graphics.drawq(self.spriteimg,self.dataquad,math.floor(self.x+(self.direction==-1 and self.tW or 0)-3),math.floor(self.y),0,self.direction,1)
+	love.graphics.drawq(self.spriteimg,self.dataquad,math.floor(self.x)+self.tW/2,self.y,0,self.direction,1,self.tW/2,0)
 end
 function sign(x)
 	if x>0 then return 1 elseif x<0 then return -1 else return 0 end
@@ -79,16 +79,16 @@ function Player:tick(dt,level)
 	end
 	
 	if self.x<self.cW then
-		self.switchlevel(level.x-1,level.y,self)
+		self.switchlevel(level.x-1,level.y,self,"Player")
 		self.x=lWidth
 	elseif self.x>(lWidth or 320) then
-		self.switchlevel(level.x+1,level.y,self)
+		self.switchlevel(level.x+1,level.y,self,"Player")
 		self.x=0
 	elseif self.y<-self.cH then
-		self.switchlevel(level.x,level.y-1,self)
+		self.switchlevel(level.x,level.y-1,self,"Player")
 		self.y=(lHeight or 240)
 	elseif self.y>(lHeight or 240) then
-		self.switchlevel(level.x,level.y+1,self)
+		self.switchlevel(level.x,level.y+1,self,"Player")
 		self.y=0
 	end
 
