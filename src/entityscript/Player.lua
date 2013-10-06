@@ -12,6 +12,10 @@ Player.anim={
 				}
 			}
 		}
+Player.tW=5
+Player.tH=14
+Player.width=5
+Player.height=14
 Player.spriteimg=love.graphics.newImage("/entityimg/dapperman.png")
 function Player.new(x,y)
 	local new = setmetatable({},Player)
@@ -19,10 +23,6 @@ function Player.new(x,y)
 	new.y=y
 	new.speedx=0
 	new.speedy=0
-	new.tW=5
-	new.tH=14
-	new.width=5
-	new.height=14
 	new.static = false
 	new.active = true
 	new.mask = {}
@@ -55,7 +55,7 @@ function Player:tick(dt,level)
 		self.speedx = 0
 	end
 	if love.keyboard.isDown("up") and self.floored then
-		self.speedy = -140
+		self.speedy = -215
 		self.floored = false
 	end
 	

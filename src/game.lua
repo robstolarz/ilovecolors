@@ -81,8 +81,8 @@ function love.update(dt)
 		queuedlevelswitch(unpack(tolevel))
 		tolevel=nil
 	end
-	if dt>0.018 then return end
-	gravity = 300 --TODO: clean up this non-obj bs
+	--if dt>0.018 then return end
+	gravity = 600 --TODO: clean up this non-obj bs
 	physicsupdate(dt,4000,entities)
 	local l={}
 	for category,ls in pairs(entities) do
