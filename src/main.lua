@@ -1,7 +1,7 @@
 defaultfont = love.graphics.newFont()
 titlefont = love.graphics.newFont("Vera.ttf",love.graphics.getHeight()/5)
 scale = love.graphics.getWidth()/320
-love.graphics.setDefaultImageFilter("linear","nearest") --you'll be ok
+print"help"
 if love.filesystem.exists("revision") then
 	revisionnum = tonumber(love.filesystem.read("revision"))
 end

@@ -57,7 +57,7 @@ function love.draw()
 	else
 		love.graphics.push()
 		love.graphics.scale(scale)
-		love.graphics.drawq(
+		love.graphics.draw(
 			level.texture,
 			love.graphics.newQuad(
 				drawtile*level.tilesize%level.texture:getWidth(),
@@ -78,10 +78,10 @@ function love.draw()
 		love.graphics.scale(scale)
 		love.graphics.draw(editmode == 2 and level.texture2 or level.texture) --at 0,0 for picker
 		love.graphics.pop()
-		if(love.mouse.isDown("l")) then
+		if(love.mouse.isDown(1)) then
 			drawtile=tonumber(math.floor(mousey/level.tilesize)*math.floor(level.texture:getWidth()/level.tilesize)+math.floor(mousex/level.tilesize))
 		end
-	elseif love.mouse.isDown("l") then
+	elseif love.mouse.isDown(1) then
 		xblock=math.floor(mousex/level.tilesize)
 		yblock=math.floor(mousey/level.tilesize)
 		guistring = xblock..", "..yblock

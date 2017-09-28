@@ -42,7 +42,7 @@ function Player:draw()
 		self.anim[self.animstate][self.powerupstate][math.floor(self.animframe)][1]*self.tW,
 		self.anim[self.animstate][self.powerupstate][math.floor(self.animframe)][2]*self.tH,
 		self.tW,self.tH,self.spriteimg:getWidth(),self.spriteimg:getHeight())
-	love.graphics.drawq(self.spriteimg,self.dataquad,math.floor(self.x)+self.tW/2,self.y,0,self.direction,1,self.tW/2,0)
+	love.graphics.draw(self.spriteimg,self.dataquad,math.floor(self.x)+self.tW/2,self.y,0,self.direction,1,self.tW/2,0)
 end
 function Player:tick(dt,level) 
 	

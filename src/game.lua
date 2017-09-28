@@ -2,7 +2,6 @@ local scale=scale or 2
 lWidth,lHeight=320,240 --logical width, height
 local lWidth,lHeight=lWidth,lHeight
 --love.graphics.setMode(lWidth*scale,lHeight*scale,false,false)
-love.graphics.setDefaultImageFilter("linear","nearest") --you'll be ok
 local Level= love.filesystem.load("luaComponents/Level.lua")()
 JSON = love.filesystem.load("luaComponents/JSON.lua")() --apologies for laziness
 local Physics = love.filesystem.load("luaComponents/physics.lua")()
@@ -35,7 +34,7 @@ local api = {
 }
 _G.api=api
 local scriptables = {} --TODO: sandbox this? maybe?
-for _,script in ipairs(love.filesystem.enumerate("/entityscript")) do
+for _,script in ipairs(love.filesystem.getDirectoryItems("/entityscript")) do
 	if string.find(script,"%.lua$") then
 		local storedname = script:sub(1,script:match("()%.lua$")-1)
 		print(script,storedname)

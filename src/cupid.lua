@@ -40,9 +40,9 @@ local cupid_error = function(...) error(...) end
 local main_args = {...}
 
 local wraped_love = {}
-local cupid_stubs = {}
 local game_funcs = {}
-local protected_funcs = {'update','draw','keyreleased','keypressed','load'}
+local protected_funcs = {'update','draw','keyreleased','keypressed','textinput','load'}
+local _love
 local function protector(table, key, value)
 	for k,v in pairs(protected_funcs) do
 		if ( v == key ) then
@@ -50,7 +50,7 @@ local function protector(table, key, value)
 			return
 		end
 	end
-	rawset(table, key, value)
+	rawset(_love, key, value)
 end
 
 local mods = {}
@@ -85,17 +85,15 @@ local function retaining(...)
 	g.pop()
 end
 
-local _love
 local function cupid_load(args)
 	local use = true
 
 	if use then
-		setmetatable(cupid_stubs, {__index = love})
-		setmetatable(wraped_love, {__index = cupid_stubs, __newindex = protector})
+		setmetatable(wraped_love, {__index = love, __newindex = protector})
 		_love = love
 		love = wraped_love
 		for k,v in pairs(protected_funcs) do
-			cupid_stubs[v] = function(...)
+			_love[v] = function(...)
 				if g == nil then g = love.graphics end
 				local result = {}
 				local arg = {...}
@@ -240,12 +238,6 @@ for k,v in pairs(_G) do cupid_keep_global[k] = true end
 
 local function cupid_reload(keep_globals)
 
-	if love.thread then
-		for k,v in pairs(love.thread.getThreads()) do
-			--v:kill()
-		end
-	end
-
 	-- Unload packages that got loaded
 	for k,v in pairs(package.loaded) do 
 		if not cupid_keep_package[k] then package.loaded[k] = nil end
@@ -286,6 +278,24 @@ local function cupid_font(size)
 		return font
 	else
 		return g.newFont(cupid_font_data, size)
+	end
+end
+
+-- Returns offset of the last UTF-8 symbol of the string
+-- or 0 if the string is blank
+local last_offset_utf8
+local has_utf8, utf8 = pcall( require, 'utf8' )
+if has_utf8 then
+	last_offset_utf8 = function( s )
+		return utf8.offset( s, -1 ) or 0
+	end
+else
+	last_offset_utf8 = function( s )
+		local n, last_len = 0, 1
+		for uchar in s:sub(-4):gmatch( "([%z\1-\127\194-\244][\128-\191]*)" ) do
+			last_len = #uchar
+		end
+		return #s-last_len+1
 	end
 end
 
@@ -335,6 +345,7 @@ mods.console = function() return {
 			for k,v in ipairs(self.log) do
 				g.setColor(0,0,0)
 				local width, lines = g.getFont():getWrap(v[1], g.getWidth())
+				if type(lines) == 'table' then lines = #lines end
 				idx = idx + lines
 
 				g.printf(v[1], xo, self.height - idx*es, g.getWidth() - xo * 2, "left")
@@ -347,27 +358,11 @@ mods.console = function() return {
 			g.print("> " .. self.buffer .. "_", xo - 1, self.height - es - 1)
 		end)
 	end,
-	["pre-keypressed"] = function(self, key, unicode)
-		self.lastkey = unicode
-		if key == config.console_key then 
-			self:toggle()
-			return false
-		end
+	["pre-keypressed"] = function(self, key, isrepeatOrUnicode)
 
 		if not self.shown then return true end
 		
-		if unicode == 13 or unicode == 10 then
-			if ( #self.buffer > 0 ) then
-				self:command(self.buffer)
-				self.buffer = ""
-			else
-				self:toggle()
-			end
-		elseif unicode == 127 or unicode == 8 then
-			self.buffer = self.buffer:sub(0, -2)
-		elseif #key == 1 then
-			self.buffer = self.buffer .. string.char(unicode)
-		elseif key == "up" then
+		if key == "up" then
 			if self.history_idx < #self.history then
 				self.history_idx = self.history_idx + 1		
 				self.buffer = self.history[self.history_idx]
@@ -377,15 +372,41 @@ mods.console = function() return {
 				self.history_idx = self.history_idx - 1		
 				self.buffer = self.history[self.history_idx] or ""
 			end
+		else
+
+			-- Love 0.8 - Simulate text input
+			if type(isrepeatOrUnicode) == "number" then
+				self["pre-textinput"](self, string.char(isrepeatOrUnicode))
+			end
 		end
+
 		return false
 	end,
 	["pre-keyreleased"] = function(self, key)
-		if key == "escape" and self.shown then
+		if key == config.console_key then 
+			self:toggle()
+			return false
+		elseif key == "return" then
+			if ( #self.buffer > 0 ) then
+				self:command(self.buffer)
+				self.buffer = ""
+			else
+				self:toggle()
+			end
+		elseif key == "backspace" then
+			self.buffer = self.buffer:sub(1, last_offset_utf8(self.buffer) - 1)
+		elseif key == "escape" and self.shown then
 			self:toggle()
 			return false
 		end
 		if self.shown then return false end
+	end,
+	["pre-textinput"] = function(self, text)
+		if not self.shown then return true end
+		if text ~= config.console_key then
+			self.buffer = self.buffer .. text
+		end
+		return false
 	end,
 	["command"] = function(self, cmd)
 		self.history_idx = 0
@@ -396,12 +417,12 @@ mods.console = function() return {
 	end,
 	["toggle"] = function(self) 
 		self.shown = not self.shown 
-		if config.console_key_repeat then
+		if config.console_key_repeat and love.keyboard.hasKeyRepeat ~= nil then
 			if self.shown then
-				self.keyrepeat = {love.keyboard.getKeyRepeat()}
-				love.keyboard.setKeyRepeat(0.75,0.075)
+				self.keyrepeat = love.keyboard.hasKeyRepeat()
+				love.keyboard.setKeyRepeat(true)
 			elseif self.keyrepeat then
-				love.keyboard.setKeyRepeat(unpack(self.keyrepeat))
+				love.keyboard.setKeyRepeat(self.keyrepeat)
 				self.keyrepeat = nil
 			end
 		end
@@ -550,7 +571,10 @@ mods.watcher = function() return {
 	["scan"] = function(self)
 		local out = {}
 		local function scan(where)
-			local list = love.filesystem.enumerate(where)
+
+			-- Support 0.8
+			local getDirectoryItems = love.filesystem.getDirectoryItems or love.filesystem.enumerate
+			local list = getDirectoryItems(where)
 			for k,v in pairs(list) do
 				local file = where .. v
 				if not love.filesystem.isFile(file) then

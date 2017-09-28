@@ -109,7 +109,7 @@ function Level:makeSpriteBatch(which,lWidth,lHeight)
 						self.tilesize,
 						self.tilesize
 					)
-					sb:addq(q, n*self.tilesize, m*self.tilesize)
+					sb:add(q, n*self.tilesize, m*self.tilesize)
 				end
 			end
 		end
